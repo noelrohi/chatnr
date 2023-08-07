@@ -25,7 +25,7 @@ export async function POST(req: Request) {
     });
 
     const { success, limit, reset, remaining } = await ratelimit.limit(
-      `chathn_ratelimit_${ip}`,
+      `chathn_ratelimit_${ip}`
     );
 
     if (!success) {
@@ -43,58 +43,32 @@ export async function POST(req: Request) {
   const { messages } = await req.json();
 
   // check if the conversation requires a function call to be made
-  const initialResponse = await openai.createChatCompletion({
-    model: "gpt-3.5-turbo-0613",
-    messages,
-    functions,
-    function_call: "auto",
-  });
-  const initialResponseJson = await initialResponse.json();
-  const initialResponseMessage = initialResponseJson?.choices?.[0]?.message;
-
-  let finalResponse;
-
-  if (initialResponseMessage.function_call) {
-    const { name, arguments: args } = initialResponseMessage.function_call;
-    const functionResponse = await runFunction(name, JSON.parse(args));
-
-    finalResponse = await openai.createChatCompletion({
+  try {
+    const response = await openai.createChatCompletion({
       model: "gpt-3.5-turbo-0613",
       stream: true,
-      messages: [
-        ...messages,
-        initialResponseMessage,
-        {
-          role: "function",
-          name: initialResponseMessage.function_call.name,
-          content: JSON.stringify(functionResponse),
-        },
-      ],
+      messages,
+      functions,
     });
-    // Convert the response into a friendly text-stream
-    const stream = OpenAIStream(finalResponse);
-    // Respond with the stream
-    return new StreamingTextResponse(stream);
-  } else {
-    // if there's no function call, just return the initial response
-    // but first, we gotta convert initialResponse into a stream with ReadableStream
-    const chunks = initialResponseMessage.content.split(" ");
-    const stream = new ReadableStream({
-      async start(controller) {
-        for (const chunk of chunks) {
-          const bytes = new TextEncoder().encode(chunk + " ");
-          controller.enqueue(bytes);
-          await new Promise((r) =>
-            setTimeout(
-              r,
-              // get a random number between 10ms and 30ms to simulate a random delay
-              Math.floor(Math.random() * 20 + 10),
-            ),
-          );
-        }
-        controller.close();
+    const stream = OpenAIStream(response, {
+      experimental_onFunctionCall: async (
+        { name, arguments: args },
+        createFunctionCallMessages
+      ) => {
+        const data = await runFunction(name, args);
+        const newMessages = createFunctionCallMessages(data);
+        return openai.createChatCompletion({
+          messages: [...messages, ...newMessages],
+          stream: true,
+          model: "gpt-3.5-turbo-0613",
+          functions,
+        });
       },
     });
     return new StreamingTextResponse(stream);
+  } catch (e: unknown) {
+    const error = e as Error;
+    console.error(error);
+    return new Response(error.message, { status: 500 });
   }
 }
