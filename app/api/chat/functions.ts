@@ -1,5 +1,5 @@
 import { aqw, aqwfn } from "@/lib/functions/aqw";
-import { get_pinned_repos, githubfn } from "@/lib/functions/gh";
+import { enime, enimeFN } from "@/lib/functions/enime";
 import {
   get_story,
   get_story_with_comments,
@@ -7,12 +7,13 @@ import {
   hnfunctions,
   summarize_top_story,
 } from "@/lib/functions/hn";
+import { ChatCompletionFunctions } from "openai-edge";
 
-export const functions: {
-  name: string;
-  description: string;
-  parameters: object;
-}[] = [...hnfunctions, ...aqwfn, ...githubfn];
+export const functions: ChatCompletionFunctions[] = [
+  ...hnfunctions,
+  ...aqwfn,
+  ...enimeFN,
+];
 
 export async function runFunction(name: string, args: any) {
   switch (name) {
@@ -24,12 +25,14 @@ export async function runFunction(name: string, args: any) {
       return await get_story_with_comments(args["id"]);
     case "summarize_top_story":
       return await summarize_top_story();
-    case "get_pinned_repos":
-      return await get_pinned_repos(args["username"]);
     case "get_aqw_equipped_items":
       return await aqw.equipped(args["name"]);
     case "get_aqw_inventory_details":
       return await aqw.items(args["name"]);
+    case "get_recently_released_anime_episode":
+      return await enime.recent();
+    case "get_popular_anime":
+      return await enime.popular();
     default:
       return null;
   }
