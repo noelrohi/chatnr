@@ -41,13 +41,13 @@ export default function Chat() {
 
   return (
     <main className="flex flex-col items-center justify-between pb-40">
-      <div className="absolute top-5 hidden w-full justify-between px-5 sm:flex">
+      <div className="flex w-full items-center justify-between p-5 border-b">
         <Link
           href="/"
           target="_blank"
           className={buttonVariants({ variant: "link" })}
         >
-          <h1>ChatNR</h1>
+          <h1 className="font-bold leading-tight">ChatNR</h1>
         </Link>
         <div className="flex items-center">
           <ThemeToggle />
@@ -65,7 +65,7 @@ export default function Chat() {
           <div
             key={i}
             className={clsx(
-              "flex w-full items-center justify-center border-b py-8",
+              "flex w-full items-center justify-center border-b py-8 ",
               message.role !== "user" && "bg-gray-100 dark:bg-gray-900"
             )}
           >
@@ -100,7 +100,7 @@ export default function Chat() {
           </div>
         ))
       ) : (
-        <div className="border-gray-200sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border sm:w-full">
+        <div className="border-gray-200 sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border sm:w-full">
           <div className="flex flex-col space-y-4 p-7 sm:p-10">
             <h1 className="text-lg font-semibold">Welcome to {site.name}</h1>
             <p className="text-gray-500">{site.description}</p>
@@ -109,7 +109,7 @@ export default function Chat() {
             {examples.map((example, i) => (
               <Button
                 key={i}
-                className="rounded-md border  transition-all duration-75 bg-background hover:border-black dark:hover:border-white text-gray-500 dark:text-gray-400 justify-start"
+                className="border transition-all duration-75 bg-background hover:border-black dark:hover:border-white text-gray-500 dark:text-gray-400 justify-start flex-1 items-center"
                 variant={"ghost"}
                 onClick={() => {
                   setInput(example);
