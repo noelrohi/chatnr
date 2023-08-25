@@ -99,7 +99,7 @@ export function LucideMoonStar(props: SVGProps<SVGSVGElement>) {
     >
       <path
         fill="none"
-        stroke="#000000"
+        stroke="currentColor"
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeWidth="2"

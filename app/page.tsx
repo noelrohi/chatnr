@@ -1,15 +1,14 @@
 "use client";
 
-import {
-  GithubIcon,
-  LoadingCircle,
-  SendIcon
-} from "@/components/icons";
+import { GithubIcon, LoadingCircle, SendIcon } from "@/components/icons";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { examples, site } from "@/config";
 import va from "@vercel/analytics";
 import { useChat } from "ai/react";
 import clsx from "clsx";
 import { Bot, User } from "lucide-react";
+import Link from "next/link";
 import { useRef } from "react";
 import ReactMarkdown from "react-markdown";
 import Textarea from "react-textarea-autosize";
@@ -43,35 +42,40 @@ export default function Chat() {
   return (
     <main className="flex flex-col items-center justify-between pb-40">
       <div className="absolute top-5 hidden w-full justify-between px-5 sm:flex">
-        <a
+        <Link
           href="/"
           target="_blank"
-          className="rounded-lg p-2 transition-colors duration-200 hover:bg-stone-100 sm:bottom-auto"
+          className={buttonVariants({ variant: "link" })}
         >
           <h1>ChatNR</h1>
-        </a>
-        <a
-          href="https://github.com/gneiru/chatnr"
-          target="_blank"
-          className="rounded-lg p-2 transition-colors duration-200 hover:bg-stone-100 sm:bottom-auto"
-        >
-          <GithubIcon />
-        </a>
+        </Link>
+        <div className="flex items-center">
+          <ThemeToggle />
+          <Link
+            href="https://github.com/gneiru/chatnr"
+            target="_blank"
+            className={buttonVariants({ variant: "link", size: "icon" })}
+          >
+            <GithubIcon />
+          </Link>
+        </div>
       </div>
       {messages.length > 0 ? (
         messages.map((message, i) => (
           <div
             key={i}
             className={clsx(
-              "flex w-full items-center justify-center border-b border-gray-200 py-8",
-              message.role === "user" ? "bg-white" : "bg-gray-100"
+              "flex w-full items-center justify-center border-b py-8",
+              message.role !== "user" && "bg-gray-100 dark:bg-gray-900"
             )}
           >
             <div className="flex w-full max-w-screen-md items-start space-x-4 px-5 sm:px-0">
               <div
                 className={clsx(
                   "p-1.5 text-white",
-                  message.role === "assistant" ? "bg-green-500" : "bg-black"
+                  message.role === "assistant"
+                    ? "bg-green-500"
+                    : "bg-neutral-700"
                 )}
               >
                 {message.role === "user" ? (
@@ -98,32 +102,31 @@ export default function Chat() {
       ) : (
         <div className="border-gray-200sm:mx-0 mx-5 mt-20 max-w-screen-md rounded-md border sm:w-full">
           <div className="flex flex-col space-y-4 p-7 sm:p-10">
-            <h1 className="text-lg font-semibold text-black">
-              Welcome to {site.name}
-            </h1>
+            <h1 className="text-lg font-semibold">Welcome to {site.name}</h1>
             <p className="text-gray-500">{site.description}</p>
           </div>
-          <div className="flex flex-col space-y-4 border-t border-gray-200 bg-gray-50 p-7 sm:p-10">
+          <div className="flex flex-col space-y-4 border-t bg-gray-50  dark:bg-neutral-800 p-7 sm:p-10">
             {examples.map((example, i) => (
-              <button
+              <Button
                 key={i}
-                className="rounded-md border border-gray-200 bg-white px-5 py-3 text-left text-sm text-gray-500 transition-all duration-75 hover:border-black hover:text-gray-700 active:bg-gray-50"
+                className="rounded-md border  transition-all duration-75 bg-background hover:border-black dark:hover:border-white text-gray-500 dark:text-gray-400 justify-start"
+                variant={"ghost"}
                 onClick={() => {
                   setInput(example);
                   inputRef.current?.focus();
                 }}
               >
                 {example}
-              </button>
+              </Button>
             ))}
           </div>
         </div>
       )}
-      <div className="fixed bottom-0 flex w-full flex-col items-center space-y-3 bg-gradient-to-b from-transparent via-gray-100 to-gray-100 p-5 pb-3 sm:px-0">
+      <div className="fixed bottom-0 flex w-full flex-col items-center space-y-3 bg-gradient-to-b from-transparent via-gray-100 dark:via-neutral-900 dark:to-neutral-900 to-gray-100 p-5 pb-3 sm:px-0">
         <form
           ref={formRef}
           onSubmit={handleSubmit}
-          className="relative w-full max-w-screen-md rounded-xl border border-gray-200 bg-white px-4 pb-2 pt-3 shadow-lg sm:pb-3 sm:pt-4"
+          className="relative w-full max-w-screen-md rounded-xl border border-gray-200 bg-white dark:bg-black dark:border-gray-800 px-4 pb-2 pt-3 shadow-lg sm:pb-3 sm:pt-4 dark:shadow-gray-600"
         >
           <Textarea
             ref={inputRef}
@@ -141,13 +144,13 @@ export default function Chat() {
               }
             }}
             spellCheck={false}
-            className="w-full pr-10 focus:outline-none"
+            className="w-full pr-10 focus:outline-none dark:bg-black"
           />
           <button
             className={clsx(
               "absolute inset-y-0 right-3 my-auto flex h-8 w-8 items-center justify-center rounded-md transition-all",
               disabled
-                ? "cursor-not-allowed bg-white"
+                ? "cursor-not-allowed bg-white dark:bg-black"
                 : "bg-green-500 hover:bg-green-600"
             )}
             disabled={disabled}
@@ -158,7 +161,9 @@ export default function Chat() {
               <SendIcon
                 className={clsx(
                   "h-4 w-4",
-                  input.length === 0 ? "text-gray-300" : "text-white"
+                  input.length === 0
+                    ? "text-gray-300 dark:text-gray-700"
+                    : "text-white dark:text-black"
                 )}
               />
             )}
